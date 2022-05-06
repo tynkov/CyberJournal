@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "macro.html" import article_card, pagination_widget, sorted_by_widget %}
+
+{% block content %}
+    <div class="col-auto">
+        {% set page_links_count = 9 %} {# Обязательно нечётное число!!! #}
+        {% set link_format = "/page$i?sorted_by=" + sorted_by %} {# "$i" заменяется на индекс страницы #}
+        {{ sorted_by_widget("/page" + page_index|string) }}
+        {{ pagination_widget(page_index, max_page_index, page_links_count, link_format) }}
+        {% for article in articles_list %}
+            {{ article_card(article, current_user, "/page" + page_index|string + "?sorted_by=" + sorted_by + "#articleCard" + article.id|string, sorted_by) }}
+        {% endfor %}
+        {{ pagination_widget(page_index, max_page_index, page_links_count, link_format) }}
+        {#{{ sorted_by_widget("/page" + page_index|string) }}#}
+    </div>
+{% endblock %}

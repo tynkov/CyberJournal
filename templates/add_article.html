@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="col-auto mb-3">
+            {{ form.title.label }}
+            {{ form.title(class="form-control", type="text", maxlength="128") }}
+            {% for error in form.title.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.content.label }}
+            {{ form.content(class="form-control", maxlength="4096",
+                            style="resize: none;", rows="12") }}
+            {% for error in form.content.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(type="file", accept=".png, .jpg, .jpeg", class="form-control") }}
+            {% for error in form.image.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
+        <div class="alert {{ message_class }}" role="alert">{{ message }}</div>
+    </form>
+{% endblock %}

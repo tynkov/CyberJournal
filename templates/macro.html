@@ -1,0 +1,213 @@
+{# Файл с макросами для других страниц #}
+
+{% macro avatar_filename(user) %}
+    {# Получение пути к аватару пользователя #}
+    {% if user.avatar %}
+        {{ url_for("static", filename=("img/avatars/" + user.avatar)) }}
+    {% else %}
+        {{ url_for("static", filename="img/default_avatar.png") }}
+    {% endif %}
+{% endmacro %}
+
+{% macro datetime_to_string(dt) %}
+    {# Форматирование даты #}
+    {{ dt.strftime("%d %b %Y в %H:%M") }}
+{% endmacro %}
+
+{% macro like_btn(likes_count, is_liked, url, redirect_url, is_disabled=False) %}
+    {# Кнопка лайка #}
+    <a href="{{ url }}?redirect_url={{ redirect_url }}" class="btn
+        {% if is_liked %}
+            btn-success
+        {% else %}
+            btn-outline-success
+        {% endif %}
+        {% if is_disabled %}
+            disabled
+        {% endif %}" tabindex="-1">Лайков: {{ likes_count }}</a>
+{% endmacro %}
+
+{% macro edit_btn(href) %}
+    {# Кнопка редактирования статьи/комментария #}
+    <a href="{{ href }}"
+       class="btn btn-outline-warning">Изменить</a>
+{% endmacro %}
+
+{% macro delete_btn(href, modal_id) %}
+    {# Кнопка удаления статьи/комментария #}
+    <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#{{ modal_id }}">
+        Удалить
+    </button>
+    <div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-hidden="true" aria-labelledby="{{ modal_id }}Label">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="{{ modal_id }}Label">Подтвердить удаление</h5>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите совершить удаление? Это действие невозможно отменить!
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Нет</button>
+                    <a href="{{ href }}" class="btn btn-outline-danger">Да, уверен(а)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro user_role_image(user) %}
+    {# Изображение около никнейма модератора/администратора сайта #}
+    {% if user.is_admin %}
+        <img src="{{ url_for('static', filename='img/admin_img.png') }}" alt="" width="16px" height="16px">
+    {% elif user.is_moderator %}
+        <img src="{{ url_for('static', filename='img/moderator_img.png') }}" alt="" width="16px" height="16px">
+    {% endif %}
+{% endmacro %}
+
+{% macro article_card(article, current_user, url="/", sorted_by="create_date") %}
+    {# Виджет статьи на главной странице/странице пользователя #}
+    <div class="card article-card" id="articleCard{{ article.id }}">
+        <div class="card-header">
+            <h4 class="card-title">
+                <img src="{{ avatar_filename(article.user) }}" alt="" width="48" height="48">
+                <a href="/user_page/{{ article.author }}?sorted_by={{ sorted_by }}">@{{ article.user.nickname }}</a>
+                {{ user_role_image(article.user) }}
+                {{ article.title }}
+                {% if current_user.is_authenticated and article.user_can_delete(current_user) %}
+                    <span style="float: right">
+                        {% if article.user == current_user %}
+                            {{ edit_btn("/edit_article/" + article.id|string) }}
+                        {% endif %}
+                        {{ delete_btn("/delete_article/" + article.id|string, "articleModal" + article.id|string) }}
+                    </span>
+                {% endif %}
+            </h4>
+            <h6 class="card-subtitle mb-2 text-muted">Опубликовано {{ datetime_to_string(article.create_date) }}</h6>
+        </div>
+        {% if article.image %}
+            <img src="{{ url_for('static', filename='img/articles_images/' + article.image) }}"
+                 alt="" style="max-width: 40%" class="card-img-top">
+        {% endif %}
+        <div class="card-body">
+            <p class="card-text preserve-line-breaks">{{ article.content|truncate(255) }}</p>
+            <a href="/article/{{ article.id }}" class="card-link">Перейти к статье</a>
+        </div>
+        <div class="card-footer">
+            {{ like_btn(article.likes_count,
+                        current_user is in(article.likes|map(attribute='user')),
+                        "/like/" + article.id|string,
+                        url,
+                        not current_user.is_authenticated) }}
+            <span style="margin-left: 10px;">Комментариев: {{ article.comments|length }}</span>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro comment_card(comment, current_user, sorted_by="create_date") %}
+    {# Виджет комментария на странице статьи #}
+    <div class="card comment-card" id="commentCard#{{ comment.id }}">
+        <div class="card-header">
+            <h5 class="card-title">
+                <img src="{{ avatar_filename(comment.user) }}" alt="" width="48" height="48">
+                <a href="/user_page/{{ comment.author }}?sorted_by={{ sorted_by }}">@{{ comment.user.nickname }}</a>
+                {{ user_role_image(comment.user) }}
+                {% if current_user.is_authenticated and comment.user_can_delete(current_user) %}
+                    <span style="float: right">
+                        {% if comment.user == current_user %}
+                            {{ edit_btn("/edit_comment/" + comment.id|string) }}
+                        {% endif %}
+                        {{ delete_btn("/delete_comment/" + comment.id|string, "commentModal" + comment.id|string) }}
+                    </span>
+                {% endif %}
+            </h5>
+            <h6 class="card-subtitle mb-2 text-muted">Опубликовано {{ datetime_to_string(comment.create_date) }}</h6>
+        </div>
+        {% if comment.image %}
+            <img src="{{ url_for('static', filename='img/comments_images/' + comment.image) }}"
+                 alt="" style="max-width: 25%" class="card-img-top">
+        {% endif %}
+        <div class="card-body">
+            <p class="card-text preserve-line-breaks">{{ comment.text }}</p>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro user_card(user, sorted_by="create_date") %}
+    {# Виджет с краткой информацией о пользователе для страницы поиска пользователей #}
+    <div class="card user-card">
+        <div class="card-header">
+            <h4 class="card-title">
+                <img src="{{ avatar_filename(user) }}" alt="" width="48" height="48">
+                <a href="/user_page/{{ user.id }}?sorted_by={{ sorted_by }}">@{{ user.nickname }}</a>
+                {{ user_role_image(user) }}
+            </h4>
+        </div>
+        <div class="card-body">
+            {% if user.description %}
+                <p class="card-text preserve-line-breaks">{{ user.description|truncate(255) }}</p>
+            {% else %}
+                <p class="card-text">&lt;Описание отсутствует&gt;</p>
+            {% endif %}
+        </div>
+        <div class="card-footer"></div>
+    </div>
+{% endmacro %}
+
+{% macro pagination_widget(page_index, max_page_index, page_links_count, link_format) %}
+    {# Виджет навигации по страницам на главной странице/странице пользователя #}
+    <ul class="pagination" style="margin-top: 5px; margin-bottom: 5px;">
+        {% if max_page_index <= page_links_count %}
+            {% set min_link_index = 1 %}
+            {% set max_link_index = max_page_index %}
+        {% else %}
+            {% if page_index <= page_links_count // 2 + 1 %}
+                {% set min_link_index = 1 %}
+                {% set max_link_index = page_links_count %}
+            {% elif max_page_index - page_index + 1 <= page_links_count // 2 + 1 %}
+                {% set min_link_index = max_page_index - page_links_count + 1 %}
+                {% set max_link_index = max_page_index %}
+            {% else %}
+                {% set min_link_index = page_index - page_links_count // 2 %}
+                {% set max_link_index = page_index + page_links_count // 2 %}
+            {% endif %}
+        {% endif %}
+        {% if min_link_index > 1 %}
+            <li class="page-item">
+                <a href="{{ link_format|replace('$i', '1') }}" class="page-link">First</a>
+            </li>
+        {% endif %}
+        {% if page_index > 1 %}
+            <li class="page-item">
+                <a href="{{ link_format|replace('$i', (page_index - 1)|string) }}"
+                   class="page-link">&laquo;</a>
+            </li>
+        {% endif %}
+        {% for i in range(min_link_index, max_link_index + 1) %}
+            <li class="page-item {% if i == page_index %}disabled{% endif %}">
+                <a href="{{ link_format|replace('$i', i|string) }}"
+                   class="page-link">{{ i }}</a>
+            </li>
+        {% endfor %}
+        {% if page_index < max_page_index %}
+            <li class="page-item">
+                <a href="{{ link_format|replace('$i', (page_index + 1)|string) }}"
+                   class="page-link">&raquo;</a>
+            </li>
+        {% endif %}
+        {% if max_link_index < max_page_index %}
+            <li class="page-item">
+                <a href="{{ link_format|replace('$i', max_page_index|string) }}"
+                   class="page-link">Last</a>
+            </li>
+        {% endif %}
+    </ul>
+{% endmacro %}
+
+{% macro sorted_by_widget(url) %}
+   {# Виджет выбора метода сортировки статей #}
+    <div class="btn-group" role="group">
+        <a href="{{ url }}?sorted_by=create_date" class="btn btn-outline-primary">По дате создания</a>
+        <a href="{{ url }}?sorted_by=likes_count" class="btn btn-outline-primary">По количеству лайков</a>
+    </div>
+{% endmacro %}

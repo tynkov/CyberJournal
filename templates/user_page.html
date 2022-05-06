@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "macro.html" import article_card, avatar_filename, pagination_widget, sorted_by_widget, user_role_image %}
+
+{% block content %}
+<div class="col-auto">
+    <h3>
+        <img src="{{ avatar_filename(user) }}" alt="" width="48" height="48"> @{{ user.nickname }}
+        {{ user_role_image(user) }}
+    </h3>
+    <p class="preserve-line-breaks">{% if user.description %}{{ user.description }}{% else %}&lt;Описание отсутствует&gt;{% endif %}</p>
+    {% if current_user == user %}
+        <a href="/article" class="btn btn-primary">Добавить статью</a>
+        <a href="/edit_user" class="btn btn-outline-dark">Редактировать аккаунт</a>
+        <a href="/delete_user" class="btn btn-outline-danger">Удалить аккаунт</a>
+    {% elif current_user.is_authenticated and current_user.is_admin and not user.is_admin %}
+        {% if user.is_moderator %}
+            <a href="/make_simple_user/{{ user.id }}" class="btn btn-outline-warning">Понизить до обычного пользователя</a>
+        {% else %}
+            <a href="/make_moderator/{{ user.id }}" class="btn btn-outline-danger">Сделать модератором</a>
+        {% endif %}
+    {% endif %}
+    <hr>
+    {% set page_links_count = 9 %} {# Обязательно нечётное число!!! #}
+    {% set link_format = "/user_page/" + user.id|string + "/page$i?sorted_by=" + sorted_by %}
+    {# "$i" заменяется на индекс страницы #}
+    {{ pagination_widget(page_index, max_page_index, page_links_count, link_format) }}
+    {{ sorted_by_widget("/user_page/" + user.id|string + "/page" + page_index|string) }}
+    {% for article in articles_list %}
+    {{ article_card(article, current_user, "/user_page/" + user.id|string + "?sorted_by="
+                    + sorted_by + "#articleCard" + article.id|string, sorted_by) }}
+    {% else %}
+    <p class="col-auto">
+        Этот пользователь не опубликовал ни одной статьи
+    </p>
+    {% endfor %}
+    {{ pagination_widget(page_index, max_page_index, page_links_count, link_format) }}
+    {{ sorted_by_widget("/user_page/" + user.id|string + "/page" + page_index|string) }}
+</div>
+{% endblock %}

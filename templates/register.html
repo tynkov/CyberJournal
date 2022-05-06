@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="col-auto mb-3">
+            {{ form.name.label }}
+            {{ form.name(class="form-control", type="text", maxlength="64") }}
+            {% for error in form.name.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.surname.label }}
+            {{ form.surname(class="form-control", type="text", maxlength="64") }}
+            {% for error in form.surname.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.nickname.label }}
+            <div class="input-group">
+                <span class="input-group-text">@</span>
+                {{ form.nickname(class="form-control", type="text", minlength="3",
+                                 maxlength="32", aria_describedby="nicknameHelp") }}
+            </div>
+            <div class="form-text text-muted" id="nicknameHelp">
+                Длина: от 3 до 32 символов<br>
+                Может содержать только латинские буквы, арабские цифры и знаки подчёркивания
+            </div>
+            {% for error in form.nickname.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.email.label }}
+            {{ form.email(class="form-control", type="email", aria_describedby="emailHelp",
+                          maxlength="128") }}
+            <div class="form-text text-muted" id="emailHelp">
+                Используется только для авторизации и не отображается на странице
+            </div>
+            {% for error in form.email.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.password.label }}
+            {{ form.password(class="form-control", type="password", aria_describedby="passwordHelp",
+                             minlength="8", maxlength="512") }}
+            <div class="form-text text-muted" id="passwordHelp">
+                Длина: от 8 до 512 символов<br>
+                Должен содержать минимум 1 непробельный символ
+            </div>
+            {% for error in form.password.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.password_again.label }}
+            {{ form.password_again(class="form-control", type="password") }}
+            {% for error in form.password_again.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.description.label }}
+            {{ form.description(class="form-control", maxlength="4096",
+                                style="resize: none;", rows="12") }}
+            {% for error in form.description.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.avatar.label(class="form-label") }}
+            {{ form.avatar(type="file", accept=".png, .jpg, .jpeg", class="form-control") }}
+            {% for error in form.avatar.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
+        <div class="alert {{ message_class }}" role="alert">{{ message }}</div>
+    </form>
+{% endblock %}

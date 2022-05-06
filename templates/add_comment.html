@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data" id="commentForm">
+        {{ form.hidden_tag() }}
+        <div class="col-auto mb-3">
+            {{ form.text.label }}
+            {{ form.text(class="form-control", maxlength="255",
+                         style="resize: none;", rows="4") }}
+            {% for error in form.text.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">
+            {{ form.image.label(class="form-label") }}<br>
+            {{ form.image(type="file", accept=".png, .jpg, .jpeg") }}
+            {% for error in form.image.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+        <div class="col-auto mb-3">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
+        <div class="alert {{ message_class }}" role="alert">{{ message }}</div>
+    </form>
+{% endblock %}

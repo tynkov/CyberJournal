@@ -1,0 +1,25 @@
+h1.main-header {
+    display: inline;
+}
+
+.header-link-container {
+    float: right;
+    display: inline-block;
+}
+
+.preserve-line-breaks {
+    white-space: pre-wrap;
+}
+
+.article-card, .comment-card, .user-card {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+footer {
+    margin-top: 5px;
+}
+
+header {
+    margin-bottom: 5px;
+}

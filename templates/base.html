@@ -1,0 +1,71 @@
+{% from "macro.html" import avatar_filename, user_role_image %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+            crossorigin="anonymous"></script>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <header>
+        <div class="alert alert-secondary">
+            <h1 class="main-header">КиберЖурнал</h1>
+            {% if current_user.is_authenticated %}
+                <div class="header-link-container dropdown">
+                    <button class="dropdown-toggle" type="button" id="dropButton1"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ avatar_filename(current_user) }}" alt="" width="48" height="48">
+                        @{{ current_user.nickname }}{{ user_role_image(current_user) }}
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropButton1">
+                        <li>
+                            <a href="/?sorted_by={{ sorted_by }}" class="dropdown-item">На главную</a>
+                        </li>
+                        <li>
+                            <a href="/user_page/{{ current_user.id }}?sorted_by={{ sorted_by }}" class="dropdown-item">Аккаунт</a>
+                        </li>
+                        <li>
+                            <a href="/find_users" class="dropdown-item">Поиск пользователей</a>
+                        </li>
+                        <li>
+                            <a href="/logout" class="dropdown-item">Выйти из аккаунта</a>
+                        </li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="header-link-container">
+                    <a href="/register" class="btn btn-primary">Зарегистрироваться</a>
+                    <a href="/login" class="btn btn-outline-success">Войти</a>
+                    <div class="dropdown" style="display: inline-block;">
+                        <button class="dropdown-toggle btn btn-outline-secondary" type="button" id="dropButton2"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropButton2">
+                            <li>
+                                <a href="/?sorted_by={{ sorted_by }}" class="dropdown-item">На главную</a>
+                            </li>
+                            <li>
+                                <a href="/find_users" class="dropdown-item">Поиск пользователей</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+    {% block content %}{% endblock %}
+    <footer>
+        <div class="alert alert-secondary" role="alert">
+
+        </div>
+    </footer>
+</body>
+</html>

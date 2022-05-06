@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "macro.html" import comment_card, datetime_to_string, like_btn, edit_btn, delete_btn, user_role_image %}
+
+{% block content %}
+    <div class="col-auto">
+        <h4>
+            <img src="{{ avatar_filename(article.user) }}" alt="" width="48" height="48">
+            <a href="/user_page/{{ article.author }}?sorted_by={{ sorted_by }}">@{{ article.user.nickname }}</a>
+            {{ user_role_image(article.user) }}
+            {{ article.title }}
+            {% if current_user.is_authenticated and current_user.is_authenticated and article.user_can_delete(current_user) %}
+                <span style="float: right">
+                    {% if current_user == article.user %}
+                        {{ edit_btn("/edit_article/" + article.id|string) }}
+                    {% endif %}
+                    {{ delete_btn("/delete_article/" + article.id|string, "deleteModal") }}
+                </span>
+            {% endif %}
+        </h4>
+        <h6 class="text-muted">Опубликовано {{ datetime_to_string(article.create_date) }}</h6>
+        {% if article.image %}
+            <img src="{{ url_for('static', filename='img/articles_images/' + article.image) }}"
+                 alt="" style="max-width: 40%" class="card-img-top">
+        {% endif %}
+        <div>
+            <p class="preserve-line-breaks">{{ article.content }}</p>
+            {{ like_btn(article.likes_count,
+                        current_user is in(article.likes|map(attribute='user')),
+                        "/like/" + article.id|string,
+                        "/article/" + article.id|string,
+                        not current_user.is_authenticated) }}
+        </div>
+        <hr>
+        {% if current_user.is_authenticated %}
+            <a class="btn btn-primary" href="/add_comment/{{ article.id }}">Добавить комментарий</a>
+        {% endif %}
+        <hr>
+        {% for comment in article.comments|sort(attribute="create_date", reverse=True) %}
+            {{ comment_card(comment, current_user, sorted_by) }}
+        {% else %}
+            &lt;Комментарии отсутствуют&gt;
+        {% endfor %}
+    </div>
+{% endblock %}
